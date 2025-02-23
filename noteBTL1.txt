@@ -1,0 +1,13 @@
+- Bài toán:
+	- Cờ vua
+	- Minesweep
+	- Pipe
+	- Light up
+	-> Vote chọn
+
+- Work:
+	- Thực hiện giải thuật (code, bao gồm code demo) : 2 người
+	- Viết báo cáo: 1 người
+	- Video: 1 người
+	-> Việc thực hiện giải thuật cần ưu tiên làm (trong vòng 1 tuần) 
+	-> Sau đó Vid và báo cáo làm song song (cần bên làm giải thuật hợp tác)

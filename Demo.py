@@ -77,7 +77,7 @@ class MasyuGame:
         self.back_btn = Button(20, 20, 100, 50, "Back", self.GRAY, self.GRAY_DARK)
 
     def draw_board(self):
-        self.screen.fill(self.WHITE)
+      #  self.screen.fill(self.WHITE)
         for x in range(self.GRID_SIZE):
             for y in range(self.GRID_SIZE):
                 cx = self.OFFSET_X + x * self.CELL_SIZE + self.CELL_SIZE // 2
@@ -86,16 +86,17 @@ class MasyuGame:
                 
               
                 if self.board[y][x] == 1:
+                  
                     pygame.draw.circle(self.screen, self.BLACK, (cx, cy), 25, 3)  
                 elif self.board[y][x] == -1:
                     pygame.draw.circle(self.screen, self.BLACK, (cx, cy), 25) 
 
     def draw_connection(self, p1, p2):
       
-        x1 = self.OFFSET_X + p1[0] * self.CELL_SIZE + self.CELL_SIZE // 2
-        y1 = self.OFFSET_Y + p1[1] * self.CELL_SIZE + self.CELL_SIZE // 2
-        x2 = self.OFFSET_X + p2[0] * self.CELL_SIZE + self.CELL_SIZE // 2
-        y2 = self.OFFSET_Y + p2[1] * self.CELL_SIZE + self.CELL_SIZE // 2
+        x1 = self.OFFSET_X + p1[1] * self.CELL_SIZE + self.CELL_SIZE // 2
+        y1 = self.OFFSET_Y + p1[0] * self.CELL_SIZE + self.CELL_SIZE // 2
+        x2 = self.OFFSET_X + p2[1] * self.CELL_SIZE + self.CELL_SIZE // 2
+        y2 = self.OFFSET_Y + p2[0] * self.CELL_SIZE + self.CELL_SIZE // 2
         pygame.draw.line(self.screen, self.BLACK, (x1, y1), (x2, y2), 7)
 
 
@@ -112,7 +113,22 @@ class MasyuGame:
 
     def draw_scene3(self):
         self.draw_board()
+        self.draw_lines()
         self.back_btn.draw(self.screen)
+
+    def draw_lines(self):
+        
+        for i in range(self.pathIndex):
+            self.draw_connection(self.path[i], self.path[i+1])
+    def update_board(self):
+        self.board = Manager.load_input(self.testcase)
+        self.GRID_SIZE = len(self.board)
+        self.BOARD_SIZE = self.CELL_SIZE * self.GRID_SIZE
+        self.OFFSET_X = (self.WINDOW_WIDTH - self.BOARD_SIZE) // 2
+        self.OFFSET_Y = (self.WINDOW_HEIGHT - self.BOARD_SIZE) // 2
+        self.pathIndex = 0
+        self.path = Manager.read_result(self.mode, self.testcase)
+  
 
     def handleBtnClick(self, event):
 
@@ -132,17 +148,17 @@ class MasyuGame:
             if self.testcase1_btn.is_clicked(event):
                 self.currentScene += 1
                 self.testcase = 1
-                self.board = Manager.load_input(self.testcase)
+                self.update_board()
 
             if self.testcase2_btn.is_clicked(event):
                 self.currentScene += 1
                 self.testcase = 2
-                self.board = Manager.load_input(self.testcase)
+                self.update_board()
             
             if self.testcase3_btn.is_clicked(event):
                 self.currentScene += 1
                 self.testcase = 3
-                self.board = Manager.load_input(self.testcase)
+                self.update_board()
 
         elif self.currentScene == 3:
             if self.back_btn.is_clicked(event):
@@ -165,8 +181,8 @@ class MasyuGame:
 
         running = True
         while running:
-            self.screen.fill(self.WHITE)  # Xóa nội dung cũ
-            self.draw_scene()  # Vẽ scene hiện tại
+            self.screen.fill(self.WHITE)  
+            self.draw_scene() 
             pygame.display.flip()
 
             for event in pygame.event.get():
@@ -174,9 +190,9 @@ class MasyuGame:
                     running = False
                 if self.currentScene == 3 and event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT:
-                        pass
+                        if self.pathIndex > 0: self.pathIndex -= 1
                     if event.key == pygame.K_RIGHT:
-                        pass
+                        if self.pathIndex < len(self.path)-1: self.pathIndex += 1
                 self.handleBtnClick(event)
 
         pygame.quit()

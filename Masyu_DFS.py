@@ -1,6 +1,6 @@
 
 
-from Manager import getTestcase, load_input, measure_performance
+from Manager import getTestcase, load_input, measure_performance, write_result
 
 
 class MasyuDFS:
@@ -168,6 +168,8 @@ class MasyuDFS:
         if self.done:
             print("FOUND SOLUTION! ")
             print(self.resTrace)
+            write_result(1, testcase, self.resTrace)
+            
         else:
             print("SOLUTION NOT FOUND")
 

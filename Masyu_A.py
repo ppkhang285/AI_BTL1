@@ -36,16 +36,17 @@ class MasyuPuzzle:
         if prePos[0] == nextPos[0] or prePos[1] == nextPos[1]: return False
         return True
 
-    def filter_direcions(self, step, prePos, currPos, needToTurn, needToStraight):
-        print(f"Straight: {needToStraight} and Turn: {needToTurn}")
+    def filter_direcions(self, steps, prePos, currPos, needToTurn, needToStraight):
+        
         if needToStraight and needToTurn: return []
         temp = []
-        for(dx, dy) in step:
+        for(dx, dy) in steps:
             nextPos = (dx + currPos[0], dy + currPos[1])
             if not self.pos_valid(nextPos): continue
-            if needToTurn and self.isTurn(prePos, nextPos): temp.append((dx, dy))
+       
+            if needToTurn and self.isTurn(prePos, nextPos):temp.append((dx, dy))
             elif needToStraight and not self.isTurn(prePos, nextPos): temp.append((dx, dy))
-            else: temp.append((dx,dy))
+            elif not needToTurn and not needToStraight: temp.append((dx,dy))
         return temp
 
     
@@ -81,15 +82,17 @@ class MasyuPuzzle:
         #   --  (turn at path[-3]-> Check -4 and -2 -> len(path) >=4)
         if self.board[currPos[0]][currPos[1]] == -1:
             needToTurn = True
-        if self.board[prePos[0]][prePos[1]] == 1 and len(path) >=4 and self.isTurn(path[-4], path[-2]):
+        if self.board[prePos[0]][prePos[1]] == 1 and len(path) >=4 and not self.isTurn(path[-4], path[-2]):
             needToTurn = True
         
         nextSteps = self.filter_direcions(self.directions, prePos, currPos, needToTurn, needToStraight)
-     
+        
+
+
         for(dx, dy) in nextSteps:
             x, y = dx + currPos[0], dy + currPos[1]
             nextPos = (x,y)
-            if  nextPos in path and not (nextPos==path[0] and count == 1): continue
+            if  nextPos in path and not (nextPos==path[0] and count == 0): continue
             if self.board[x][y] == -1 and self.isTurn(prePos, nextPos): continue
             new_path = copy.deepcopy(path)
             new_path.append(nextPos)
@@ -126,7 +129,7 @@ class Searcher:
                 if self.board[i][j] != 0:
                     count +=1
                     if startPoint == (-1,-1): startPoint = (i,j)
-
+    
         self.start = State([startPoint], count-1)
 
 
@@ -140,6 +143,7 @@ class Searcher:
         return mahathanDistance + state.circleCount * 2
 
     def a_star_search(self):
+        
         open_set = PriorityQueue()
         closed_set = set()
         came_from = {}
@@ -154,10 +158,9 @@ class Searcher:
 
         while not open_set.empty():
             _, _,current = open_set.get()
+
+
             
-            print(current.path)
-
-
             if self.puzzle.check_goal(current.path, current.circleCount):
                 print("Found")
                 print(current.path)
@@ -185,7 +188,6 @@ class Searcher:
 
 if __name__=="__main__":
     board = load_input("input/input0.txt")
-    
     searcher = Searcher(board)
     searcher.a_star_search()
         

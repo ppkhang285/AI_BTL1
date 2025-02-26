@@ -10,7 +10,7 @@ class MasyuDFS:
         self.visited = []
         self.trace = []
         self.resTrace = tuple()
-        self.startPoint = (0, 0)
+        self.startPoint = (-1, -1)
         self.directions = [(1, 0), (-1, 0), (0, 1),  (0, -1),]
         self.circleCount = 0
         self.done = False
@@ -33,7 +33,7 @@ class MasyuDFS:
         for i in range(self.size):
             for j in range(self.size):
                 if self.board[i][j] != 0:
-                    if self.startPoint is None: self.startPoint = (i, j)
+                    if self.startPoint == (-1,-1): self.startPoint = (i, j)
                     self.circleCount += 1
                 
 
@@ -190,7 +190,7 @@ def measure_performance(func, *args, **kwargs):
 
 if __name__=="__main__":
     
-    dfs = MasyuDFS("input/input1.txt")
+    dfs = MasyuDFS("input/input0.txt")
 
     measure_performance(dfs.findSolution)
     

@@ -11,21 +11,24 @@ class MasyuPuzzle:
 
     # Check if current state is goal
     def check_goal(self, path, count):
-        if count > 0: return False
-        if (path[-1] != path[0]): return False
+      
+      if count > 0: return False
+      if (path[-1] != path[0]): return False
 
-        startPos = path[0]
+      startPos = path[0]
+      
+      # If Black -> Goal
+      if self.board[startPos[0]][startPos[1]] == -1: return True
+      else:
+          # White 
+          # Check  straight in current
+          
+          if self.isTurn(path[-2], path[1]): return False
 
-        # If Black -> Goal
-        if self.board[startPos[0]][startPos[1]] == -1: return True
-        else:
-            # White 
-            # Check  straight in current
-
-            if self.isTurn(path[-2], path[1]): return False
-            # Check turn pre and next
-            if not self.isTurn(startPos, path[-3]) or not self.isTurn(startPos,  path[2]): return False
-            return True
+          # Check turn pre and next
+          if not self.isTurn(startPos, path[-3]) and not self.isTurn(startPos,  path[2]): return False
+          
+          return True
 
     def pos_valid(self, pos):
         #Check if pos(x,y) in [0; size)
@@ -158,7 +161,13 @@ class Searcher:
 
         while not open_set.empty():
             _, _,current = open_set.get()
-
+            
+            # if current.path == testPath: 
+            #   print(current.path)
+            #   for neighbor in current.expanse(self.puzzle):
+            #     print(neighbor.path)
+               
+              
 
             
             if self.puzzle.check_goal(current.path, current.circleCount):
@@ -187,7 +196,9 @@ class Searcher:
 
 
 if __name__=="__main__":
-    board = load_input("input/input0.txt")
+    board = load_input("input/input3.txt")
+    #testPath = [(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (5, 1), (5, 2), (5, 3), (4, 3), (3, 3), (3, 2), (3, 1), (2, 1), (1, 1), (1, 2), (1, 3), (1, 4), (2, 4), (3, 4), (4, 4), (4, 5), (3, 5), (2, 5), (1, 5), (0, 5), (0, 4), (0, 3), (0, 2), (0, 1), (0,0), (1,0)]
+
     searcher = Searcher(board)
     searcher.a_star_search()
         

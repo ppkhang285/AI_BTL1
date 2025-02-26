@@ -1,7 +1,8 @@
 import copy
 import itertools
+import sys
 from queue import PriorityQueue
-from FileManager import load_input
+from Manager import getTestcase, load_input, measure_performance, write_result
 class MasyuPuzzle:
 
     def __init__(self, board):
@@ -114,7 +115,7 @@ class State:
         # Return list of valid states
         return [State(path, count) for path, count in puzzle.movements(self.path, self.circleCount)]
 
-class Searcher:
+class AStarSeacher:
     def __init__(self, board):
         self.board = board
         self.size = len(board)
@@ -143,7 +144,7 @@ class Searcher:
 
         mahathanDistance = abs(currenPos[0] - startPos[0]) + abs(currenPos[1] - startPos[1])
         
-        return mahathanDistance + state.circleCount * 2
+        return mahathanDistance + state.circleCount * 3
 
     def a_star_search(self):
         
@@ -162,17 +163,12 @@ class Searcher:
         while not open_set.empty():
             _, _,current = open_set.get()
             
-            # if current.path == testPath: 
-            #   print(current.path)
-            #   for neighbor in current.expanse(self.puzzle):
-            #     print(neighbor.path)
-               
-              
 
             
             if self.puzzle.check_goal(current.path, current.circleCount):
                 print("Found")
                 print(current.path)
+                write_result(2, testcase, current.path)
                 return
             
             for neighbor in current.expanse(self.puzzle):
@@ -196,9 +192,11 @@ class Searcher:
 
 
 if __name__=="__main__":
-    board = load_input("input/input3.txt")
-    #testPath = [(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (5, 1), (5, 2), (5, 3), (4, 3), (3, 3), (3, 2), (3, 1), (2, 1), (1, 1), (1, 2), (1, 3), (1, 4), (2, 4), (3, 4), (4, 4), (4, 5), (3, 5), (2, 5), (1, 5), (0, 5), (0, 4), (0, 3), (0, 2), (0, 1), (0,0), (1,0)]
+    
+    testcase = getTestcase()
+    board = load_input(testcase)
 
-    searcher = Searcher(board)
-    searcher.a_star_search()
+    searcher = AStarSeacher(board)
+    measure_performance(searcher.a_star_search)
+    
         

@@ -1,12 +1,12 @@
-import time
-import tracemalloc
 
+
+from Manager import getTestcase, load_input, measure_performance
 
 
 class MasyuDFS:
-    def __init__(self, path):
+    def __init__(self, board):
         
-        self.board = []
+        self.board = board
         self.visited = []
         self.trace = []
         self.resTrace = tuple()
@@ -14,18 +14,18 @@ class MasyuDFS:
         self.directions = [(1, 0), (-1, 0), (0, 1),  (0, -1),]
         self.circleCount = 0
         self.done = False
-        self.size = 0
+        self.size = len(board)
 
-        self.load_input(path)
+  
         self.init()
 
-    def load_input(self,path):
-        with open(path) as f:
-            self.size = int(f.readline().strip())
+    # def load_input(self,path):
+    #     with open(path) as f:
+    #         self.size = int(f.readline().strip())
 
-            for _ in range(self.size):  
-                line = f.readline().strip().split() 
-                self.board.append([int(num) for num in line])  
+    #         for _ in range(self.size):  
+    #             line = f.readline().strip().split() 
+    #             self.board.append([int(num) for num in line])  
 
     
     def init(self):
@@ -172,25 +172,12 @@ class MasyuDFS:
             print("SOLUTION NOT FOUND")
 
 
-def measure_performance(func, *args, **kwargs):
-    tracemalloc.start()
-    start_time = time.perf_counter()
 
-    result = func(*args, **kwargs)
-
-    end_time = time.perf_counter()
-    current, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
-
-    print(f"Thời gian chạy: {end_time - start_time:.6f} giây")
-    print(f"Dung lượng bộ nhớ hiện tại: {current / 1024:.2f} KB")
-    print(f"Dung lượng bộ nhớ tối đa: {peak / 1024:.2f} KB")
-
-    return result
 
 if __name__=="__main__":
-    
-    dfs = MasyuDFS("input/input0.txt")
+    testcase = getTestcase()
+    board = load_input(testcase)
+    dfs = MasyuDFS(board)
 
     measure_performance(dfs.findSolution)
     

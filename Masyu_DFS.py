@@ -2,191 +2,176 @@
 
 from Manager import getTestcase, load_input, measure_performance, write_result
 
+class MasyuPuzzle:
 
-class MasyuDFS:
     def __init__(self, board):
-        
         self.board = board
-        self.visited = []
-        self.trace = []
-        self.resTrace = tuple()
-        self.startPoint = (-1, -1)
-        self.directions = [(1, 0), (-1, 0), (0, 1),  (0, -1),]
-        self.circleCount = 0
-        self.done = False
+        self.size =  len(board)
+        self.directions = [(0, 1), (1, 0), (-1, 0), (0, -1)]
+
+    # Check if current state is goal
+    def check_goal(self, path, count):
+
+      if count > 0: return False
+      if (path[-1] != path[0]): return False
+
+      startPos = path[0]
+
+      # If Black -> Goal
+      if self.board[startPos[0]][startPos[1]] == -1: return True
+      else:
+          # White
+          # Check  straight in current
+
+          if self.isTurn(path[-2], path[1]): return False
+
+          # Check turn pre and next
+          if not self.isTurn(startPos, path[-3]) and not self.isTurn(startPos,  path[2]): return False
+
+          return True
+
+    def pos_valid(self, pos):
+        #Check if pos(x,y) in [0; size)
+        return 0 <= pos[0] < self.size and  0 <= pos[1] < self.size
+
+    def isTurn(self, prePos, nextPos):
+        # Retur True if turn else False (Go Straight)
+        if prePos[0] == nextPos[0] or prePos[1] == nextPos[1]: return False
+        return True
+
+    def filter_direcions(self, steps, prePos, currPos, needToTurn, needToStraight):
+
+        if needToStraight and needToTurn: return []
+        temp = []
+        for(dx, dy) in steps:
+            nextPos = (dx + currPos[0], dy + currPos[1])
+            if not self.pos_valid(nextPos): continue
+
+            if needToTurn and self.isTurn(prePos, nextPos):temp.append((dx, dy))
+            elif needToStraight and not self.isTurn(prePos, nextPos): temp.append((dx, dy))
+            elif not needToTurn and not needToStraight: temp.append((dx,dy))
+        return temp
+
+
+
+    # Return all new valid state
+    def movements(self, path, count):
+
+        currPos = path[-1]
+        # Path has only 1 point
+        if len(path) <= 1:
+          for (dx, dy) in self.directions:
+              x, y = dx + currPos[0], dy + currPos[1]
+              if self.pos_valid((x, y)):
+                  path.append((x, y))  # Modify path in place
+                  new_count = count - (self.board[x][y] != 0)
+                  yield path, new_count
+                  path.pop()  # Backtrack
+          return
+
+        prePos = path[-2]
+        # Flag if need to turn/go straight
+        needToTurn = False
+        needToStraight = False
+
+
+        # Go Straight if Current is White or Previous is Black
+        if self.board[currPos[0]][ currPos[1]] == 1 or self.board[prePos[0]][ prePos[1]] == -1:
+            needToStraight = True
+
+        # Turn if
+        #   - Current is Black
+        #   - Previous is White and Straight previous:
+        #   --  (turn at path[-3]-> Check -4 and -2 -> len(path) >=4)
+        if self.board[currPos[0]][currPos[1]] == -1:
+            needToTurn = True
+        if self.board[prePos[0]][prePos[1]] == 1 and len(path) >=4 and not self.isTurn(path[-4], path[-2]):
+            needToTurn = True
+
+        nextSteps = self.filter_direcions(self.directions, prePos, currPos, needToTurn, needToStraight)
+
+
+
+        for(dx, dy) in nextSteps:
+            x, y = dx + currPos[0], dy + currPos[1]
+            nextPos = (x,y)
+            if  nextPos in path and not (nextPos==path[0] and count == 0): continue
+            if self.board[x][y] == -1 and self.isTurn(prePos, nextPos): continue
+             #new_path = copy.deepcopy(path)
+            # new_path.append(nextPos)
+           # path.append(nextPos)
+            # new_count = count - (self.board[nextPos[0]][nextPos[1]] != 0)
+            # yield path, new_count
+            path.append(nextPos)  # Modify in place
+            new_count = count - (self.board[x][y] != 0)
+            yield path, new_count
+            path.pop()  # Backtrack
+
+
+
+class State:
+
+    def __init__(self, path,  circleNum: int = 0):
+        self.path = path
+        self.circleCount = circleNum
+
+    def expanse(self, puzzle):
+        # Return list of valid states
+        for move in puzzle.movements(self.path, self.circleCount):
+            yield State(self.path, move[1])
+
+
+class DfsSearcher:
+    def __init__(self, board):
+        self.board = board
         self.size = len(board)
+        self.puzzle = MasyuPuzzle(board)
+        self.path = []  # Single path for all states
+        self.found = False
+        self.initialize()
 
-  
-        self.init()
-
-    # def load_input(self,path):
-    #     with open(path) as f:
-    #         self.size = int(f.readline().strip())
-
-    #         for _ in range(self.size):  
-    #             line = f.readline().strip().split() 
-    #             self.board.append([int(num) for num in line])  
-
-    
-    def init(self):
-
+    def initialize(self):
+        startPoint = (-1, -1)
+        count = 0
         for i in range(self.size):
             for j in range(self.size):
                 if self.board[i][j] != 0:
-                    if self.startPoint == (-1,-1): self.startPoint = (i, j)
-                    self.circleCount += 1
-                
+                    count += 1
+                    if startPoint == (-1, -1):
+                        startPoint = (i, j)
 
-    def isStraight(self, i,j, x, y): # pre and next node
-        if i == x or j == y: return True
-        return False
+        self.path.append(startPoint)  # Set initial path
+        self.start = State(self.path, count - 1)
 
-    def validMove(self, pre_i, pre_j, i, j, mode):
-        #Mode:
-        # 0: every where
-        # 1: go straingt
-        # 2: turn off
-        nextPoints = []
-        for (dx, dy) in self.directions:
-            x = i + dx
-            y = j + dy
-            # print(f"Pre I J {i} - {j}")
-            # print(f"X - Y: {x} - {y}")
-            preStraight = self.isStraight(pre_i, pre_j, x, y)
-            if not self.validPos(x,y): continue
-            if mode == 0:
-                nextPoints.append((x,y))
-            elif mode == 1:
-                
-                if preStraight:
-                    nextPoints.append((x, y))
-            elif mode == 2:
-                if not preStraight:
-                    nextPoints.append((x, y))
-        
-        return nextPoints
-        
-
-
-
-    def validPos(self, i, j):
-        if (i < 0 or i >= self.size): return False
-        if (j < 0 or j >= self.size): return False
-        if (i,j) != self.startPoint and   self.visited[i][j]: return False
-        return True
-
-    def DFS(self, i, j, count, needStrainght, needTurn):
-
-        
-       
-        self.visited[i][j] = 1
-        self.trace.append((i,j))
-
-        if count == 0 and i == self.startPoint[0] and j == self.startPoint[1]:
-            preIsStraight = self.isStraight(self.trace[-3][0], self.trace[-3][1], i, j)
-            firstIsStraight = self.isStraight(self.trace[0][0], self.trace[0][1], self.trace[2][0], self.trace[2][1])
-            starEndStraight = self.isStraight(self.trace[-2][0], self.trace[-2][1], self.trace[1][0], self.trace[1][1])
-            stop = False
-            if self.board[i][j] < 0:
-                if not starEndStraight and preIsStraight and firstIsStraight:
-                    stop = True
-            
-            else:
-                if starEndStraight and not (preIsStraight and firstIsStraight):
-                    stop = True
-            if stop:
-                self.done = True
-                self.resTrace = tuple(self.trace)
-                return
-        
-        mode = needStrainght * 1 + needTurn * 2
-
-        if mode >=3:
-            self.visited[i][j] = 0
-            self.trace.pop()
+    def DFS(self, state):
+        if self.puzzle.check_goal(state.path, state.circleCount):
+            print("Found")
+            print(state.path)
+            write_result(1, testcase, state.path)
+            self.found = True
             return
 
-        willTurn = False
-        willStraight = False
-        goBack = False
-        nextCount = count - (self.board[i][j] != 0)
-        
+        for neighbor in state.expanse(self.puzzle):
+            self.DFS(neighbor)
+            if self.found:
+                return
 
-        if self.board[i][j] < 0: #Must Turn - Will Straight - Must PreTurn
-            if len(self.trace) > 2:
-                if  self.isStraight(self.trace[-3][0], self.trace[-3][1], i, j) :
-                    
-                    goBack = needStrainght
-                    
-                else:
-                    goBack = True
-            willStraight = True
-            mode = 2 
-            
-
-        elif self.board[i][j] > 0: #Must Straight - Maybe will Turn
-            if len(self.trace)> 2:
-                if  self.isStraight(self.trace[-3][0], self.trace[-3][1], i, j):
-                    willTurn = True
-                goBack = needTurn
-            mode = 1
-
-        
-        
-        if not goBack:
-            preI = 0
-            preJ = 0
-
-            if len(self.trace) > 1:
-                preI =  self.trace[-2][0]
-                preJ = self.trace[-2][1]
-            else:
-                mode = 0
-
-            validMoveArr = self.validMove(preI , preJ, i, j, mode)
-            for (x,y) in validMoveArr:
-                if self.done: return
-                self.DFS(x, y, nextCount, willStraight, willTurn)
-                
-        
-        self.visited[i][j] = 0
-        self.trace.pop()
-
-    
-    def reset(self):
+    def Dfs_search(self):
+        self.DFS(self.start)
 
 
-        self.trace = []    
-        self.done = False
-        self.visited  = [[0 for i in range(self.size)] for j in range(self.size)]
-
-
-    def findSolution(self):
-        self.reset()
-    
-        self.DFS(self.startPoint[0], self.startPoint[1], self.circleCount, 0 , 0)
-        if self.done:
-            print("FOUND SOLUTION! ")
-            print(self.resTrace)
-            write_result(1, testcase, self.resTrace)
-            
-        else:
-            print("SOLUTION NOT FOUND")
 
 
 
 
 if __name__=="__main__":
-    testcase = getTestcase()
+    testcase =3# getTestcase()
     board = load_input(testcase)
-    dfs = MasyuDFS(board)
+    dfs = DfsSearcher(board)
+    measure_performance(dfs.Dfs_search)
 
-    measure_performance(dfs.findSolution)
-    
-    
-    
-   
-    
-    
+
+
+
 
 

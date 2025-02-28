@@ -1,4 +1,5 @@
 import itertools
+import heapq
 from Manager import getTestcase, load_input, measure_performance, write_result
 
 class MasyuPuzzle:
@@ -123,7 +124,7 @@ class AStarSearcher:
         return manhattan_distance + state.circle_count *3
 
     def a_star_search(self):
-        import heapq
+        
         open_set = []
         closed_set = set()
         came_from = {}

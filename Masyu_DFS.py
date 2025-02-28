@@ -165,7 +165,7 @@ class DfsSearcher:
 
 
 if __name__=="__main__":
-    testcase =3# getTestcase()
+    testcase = getTestcase()
     board = load_input(testcase)
     dfs = DfsSearcher(board)
     measure_performance(dfs.Dfs_search)

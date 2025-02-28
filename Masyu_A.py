@@ -1,6 +1,4 @@
 import itertools
-import sys
-from queue import PriorityQueue
 from Manager import getTestcase, load_input, measure_performance, write_result
 
 class MasyuPuzzle:
@@ -161,7 +159,7 @@ class AStarSearcher:
         print("Not found")
 
 if __name__ == "__main__":
-    testcase = 3#getTestcase()
+    testcase = getTestcase()
     board = load_input(testcase)
 
     searcher = AStarSearcher(board)

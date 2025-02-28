@@ -1,8 +1,8 @@
 import pygame
 
 import Manager
-from Masyu_A import AStarSeacher
-from Masyu_DFS import MasyuDFS
+# from Masyu_A import AStarSeacher
+# from Masyu_DFS import DfsSearcher
 
 class Button:
     def __init__(self, x, y, w, h, text, color, hover_color):

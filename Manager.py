@@ -79,7 +79,7 @@ def getTestcase():
         print("Error: Testcase must be an integer.")
         sys.exit(1)
 
-    if testcase <=0 or testcase >3:
-        print("Testcase must be in [1,2,3]")
+    if testcase <=0 or testcase >4:
+        print("Testcase must be in [1,2,3,4]")
         sys.exit(1)
     return testcase

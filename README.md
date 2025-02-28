@@ -25,3 +25,8 @@ The rules are simple. You have to draw lines between the dots to form a single l
 - g(x) = số điểm đã đi qua
 - f(x) = h(x) + g(x)
 - State bao gồm: path(đường đã đi) và circleCount(số ô trắng/đen chưa khám phá)
+- Có 2 thứ muốn hướng đến: 
+1. đường vẽ sẽ là ngắn nhất 
+2. Tìm đường sao cho thỏa mãn nhiều ô tròn nhất
+- Trong đó sẽ ưu tiên cái thứ 2 hơn nên trong hàm Heu sẽ nhân 3 lên
+- Cái 1 sẽ dùng Khoảng cách Mahathan để đánh giá, vì là vẽ 1 vòng tròn khép kính nên mong muốn điểm hiện tại gần điểm ban đầu nhất có thể
